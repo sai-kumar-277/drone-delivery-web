@@ -52,11 +52,10 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        neon: {
+          blue: "#00f3ff",
+          purple: "#8000ff",
+        },
       },
       keyframes: {
         "accordion-down": {
@@ -67,10 +66,28 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "drone-fly": {
+          "0%": { transform: "translateX(-100%) translateY(0)" },
+          "50%": { transform: "translateX(0) translateY(-20px)" },
+          "100%": { transform: "translateX(100%) translateY(0)" },
+        },
+        glow: {
+          "0%": {
+            boxShadow: "0 0 5px rgba(0, 243, 255, 0.5), 0 0 10px rgba(0, 243, 255, 0.3)",
+          },
+          "50%": {
+            boxShadow: "0 0 10px rgba(0, 243, 255, 0.8), 0 0 20px rgba(0, 243, 255, 0.5)",
+          },
+          "100%": {
+            boxShadow: "0 0 5px rgba(0, 243, 255, 0.5), 0 0 10px rgba(0, 243, 255, 0.3)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "drone-fly": "drone-fly 20s linear infinite",
+        glow: "glow 2s ease-in-out infinite",
       },
     },
   },
