@@ -1,14 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapPin } from 'lucide-react';
+import { Button } from './ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from './ui/sheet';
 
 const ServiceAreas = () => {
+  const coveredCities = [
+    'New York City, NY',
+    'Los Angeles, CA',
+    'Chicago, IL',
+    'Houston, TX',
+    'Phoenix, AZ',
+    'Philadelphia, PA',
+    'San Antonio, TX',
+    'San Diego, CA',
+    'Dallas, TX',
+    'San Jose, CA'
+  ];
+
   return (
     <section className="section-container">
       <h2 className="text-4xl font-bold mb-8">Coverage Areas</h2>
       <div className="bg-secondary/50 p-8 rounded-lg backdrop-blur-sm">
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <MapPin className="text-neon-blue h-6 w-6" />
-          <span className="text-xl">Currently serving major metropolitan areas</span>
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <MapPin className="text-neon-blue h-6 w-6" />
+            <span className="text-xl">Currently serving major metropolitan areas</span>
+          </div>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="border-neon-blue text-neon-blue hover:bg-neon-blue/10">
+                View Covered Cities
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Covered Cities</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6">
+                <ul className="space-y-2">
+                  {coveredCities.map((city, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-neon-blue" />
+                      {city}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
         <div className="aspect-video rounded-lg overflow-hidden">
           <iframe
