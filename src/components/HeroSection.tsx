@@ -1,28 +1,59 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import GhostButton from './ui/GhostButton';
 import { Package } from 'lucide-react';
 
 const HeroSection = () => {
+  const droneRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (droneRef.current) {
+        const scrollY = window.scrollY;
+        const movement = scrollY * 0.5; // Adjust speed
+        droneRef.current.style.transform = `translateX(${movement}px)`;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      <div className="absolute w-full h-full">
+      <div className="absolute w-full h-full flex items-center justify-center">
         <svg 
-          className="w-96 h-96 absolute animate-float opacity-70"
-          viewBox="0 0 24 24"
+          ref={droneRef}
+          className="w-[500px] h-[500px] opacity-20"
+          viewBox="0 0 100 100"
           fill="none"
           stroke="currentColor"
           strokeWidth="1"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          {/* Drone body */}
-          <path d="M12 8L8 12L12 16L16 12L12 8" className="text-neon-blue" />
-          {/* Drone arms */}
-          <line x1="8" y1="12" x2="4" y2="12" className="text-neon-blue" />
-          <line x1="16" y1="12" x2="20" y2="12" className="text-neon-blue" />
+          {/* Main body */}
+          <path d="M40 50 L60 50 L55 60 L45 60 Z" className="text-neon-blue fill-neon-blue/20" />
+          
+          {/* Camera/Sensor housing */}
+          <circle cx="50" cy="55" r="3" className="text-neon-blue fill-neon-blue/20" />
+          
+          {/* Arms */}
+          <line x1="40" y1="50" x2="20" y2="50" className="text-neon-blue" strokeWidth="2" />
+          <line x1="60" y1="50" x2="80" y2="50" className="text-neon-blue" strokeWidth="2" />
+          <line x1="45" y1="45" x2="35" y2="35" className="text-neon-blue" strokeWidth="2" />
+          <line x1="55" y1="45" x2="65" y2="35" className="text-neon-blue" strokeWidth="2" />
+          
           {/* Propellers */}
-          <circle cx="4" cy="12" r="2" className="text-neon-blue animate-spin" />
-          <circle cx="20" cy="12" r="2" className="text-neon-blue animate-spin" />
+          <g className="animate-spin origin-center">
+            <ellipse cx="20" cy="50" rx="8" ry="1" className="text-neon-blue" />
+            <ellipse cx="80" cy="50" rx="8" ry="1" className="text-neon-blue" />
+            <ellipse cx="35" cy="35" rx="8" ry="1" className="text-neon-blue" transform="rotate(-45, 35, 35)" />
+            <ellipse cx="65" cy="35" rx="8" ry="1" className="text-neon-blue" transform="rotate(45, 65, 35)" />
+          </g>
+          
+          {/* Landing gear */}
+          <line x1="45" y1="60" x2="43" y2="65" className="text-neon-blue" />
+          <line x1="55" y1="60" x2="57" y2="65" className="text-neon-blue" />
         </svg>
       </div>
       
