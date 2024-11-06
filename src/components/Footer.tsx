@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Telegram } from 'lucide-react';
+import { Instagram, MessageSquare } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -26,9 +26,9 @@ const Footer = () => {
                 className="text-gray-400 hover:text-neon-blue transition-colors">
                 <Instagram className="h-6 w-6" />
               </a>
-              <a href="https://telegram.org" target="_blank" rel="noopener noreferrer"
+              <a href="https://t.me/dronedelivery" target="_blank" rel="noopener noreferrer"
                 className="text-gray-400 hover:text-neon-blue transition-colors">
-                <Telegram className="h-6 w-6" />
+                <MessageSquare className="h-6 w-6" />
               </a>
             </div>
           </div>

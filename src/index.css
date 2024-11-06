@@ -38,11 +38,11 @@
 
 @layer utilities {
   .ghost-button {
-    @apply relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-mono font-medium tracking-tighter text-neon-blue border border-neon-blue rounded-lg group;
+    @apply relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-mono font-medium tracking-tighter text-neon-blue border border-neon-blue rounded-lg;
   }
 
   .ghost-button::before {
-    @apply content-[''] bg-neon-blue absolute top-0 left-0 w-full h-full opacity-10 transition-all duration-300 ease-out scale-x-0 group-hover:scale-x-100 origin-left;
+    @apply content-[''] bg-neon-blue absolute top-0 left-0 w-full h-full opacity-10 transition-all duration-300 ease-out scale-x-0 origin-left;
   }
 
   .ghost-button:hover {
