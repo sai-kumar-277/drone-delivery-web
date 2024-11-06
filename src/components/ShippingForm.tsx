@@ -12,12 +12,16 @@ import {
   DialogTrigger,
 } from './ui/dialog';
 
+interface MapClickEvent {
+  latLng?: google.maps.LatLng;
+}
+
 const ShippingForm = () => {
   const [pickupAddress, setPickupAddress] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [mapType, setMapType] = useState<'pickup' | 'delivery' | null>(null);
 
-  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+  const handleMapClick = (e: MapClickEvent) => {
     if (!e.latLng) return;
     
     const geocoder = new google.maps.Geocoder();
