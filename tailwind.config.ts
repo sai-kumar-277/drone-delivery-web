@@ -66,10 +66,25 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "drone-fly": {
-          "0%": { transform: "translateX(-100%) translateY(0)" },
-          "50%": { transform: "translateX(0) translateY(-20px)" },
-          "100%": { transform: "translateX(100%) translateY(0)" },
+        float: {
+          "0%": { 
+            transform: "translateX(-100%) translateY(0)",
+            opacity: "0"
+          },
+          "10%": {
+            opacity: "1"
+          },
+          "90%": {
+            opacity: "1"
+          },
+          "100%": { 
+            transform: "translateX(100%) translateY(-50px)",
+            opacity: "0"
+          },
+        },
+        spin: {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
         },
         glow: {
           "0%": {
@@ -86,8 +101,9 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "drone-fly": "drone-fly 20s linear infinite",
-        glow: "glow 2s ease-in-out infinite",
+        "float": "float 20s ease-in-out infinite",
+        "spin": "spin 3s linear infinite",
+        "glow": "glow 2s ease-in-out infinite",
       },
     },
   },
