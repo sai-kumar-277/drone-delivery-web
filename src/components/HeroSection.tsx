@@ -10,8 +10,8 @@ const HeroSection = () => {
     const handleScroll = () => {
       if (droneRef.current) {
         const scrollY = window.scrollY;
-        const movement = scrollY * 0.5; // Adjust speed
-        const opacity = Math.max(0.2 - (Math.abs(movement) / 1000), 0); // Fade out based on movement
+        const movement = scrollY * 0.5;
+        const opacity = Math.max(0.2 - (Math.abs(movement) / 1000), 0);
         droneRef.current.style.transform = `translateX(${movement}px)`;
         droneRef.current.style.opacity = opacity.toString();
       }
@@ -28,7 +28,7 @@ const HeroSection = () => {
         <div className="absolute w-full h-full flex items-center justify-center">
           <svg 
             ref={droneRef}
-            className="w-[500px] h-[500px]"
+            className="w-[600px] h-[600px]"
             viewBox="0 0 100 100"
             fill="none"
             stroke="currentColor"
@@ -48,12 +48,12 @@ const HeroSection = () => {
             <line x1="45" y1="45" x2="35" y2="35" className="text-neon-blue" strokeWidth="2" />
             <line x1="55" y1="45" x2="65" y2="35" className="text-neon-blue" strokeWidth="2" />
             
-            {/* Propellers */}
+            {/* Propellers - now horizontal */}
             <g>
-              <line x1="12" y1="50" x2="28" y2="50" className="text-neon-blue animate-spin origin-[20px_50px]" />
-              <line x1="72" y1="50" x2="88" y2="50" className="text-neon-blue animate-spin origin-[80px_50px]" />
-              <line x1="27" y1="35" x2="43" y2="35" className="text-neon-blue animate-spin origin-[35px_35px]" transform="rotate(-45, 35, 35)" />
-              <line x1="57" y1="35" x2="73" y2="35" className="text-neon-blue animate-spin origin-[65px_35px]" transform="rotate(45, 65, 35)" />
+              <line x1="20" y1="45" x2="20" y2="55" className="text-neon-blue animate-spin origin-[20px_50px]" />
+              <line x1="80" y1="45" x2="80" y2="55" className="text-neon-blue animate-spin origin-[80px_50px]" />
+              <line x1="35" y1="30" x2="35" y2="40" className="text-neon-blue animate-spin origin-[35px_35px]" transform="rotate(-45, 35, 35)" />
+              <line x1="65" y1="30" x2="65" y2="40" className="text-neon-blue animate-spin origin-[65px_35px]" transform="rotate(45, 65, 35)" />
             </g>
             
             {/* Landing gear */}
