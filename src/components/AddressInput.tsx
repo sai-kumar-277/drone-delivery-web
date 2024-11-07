@@ -39,6 +39,7 @@ const AddressInput = ({
           onSelectLocation={onSelectLocation}
           onCurrentLocation={onCurrentLocation}
           tempCoordinates={tempCoordinates}
+          selectedAddress={value}
         />
       </div>
     </div>
