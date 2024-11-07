@@ -1,8 +1,15 @@
 import React from 'react';
 import { Package, Plane, Truck } from 'lucide-react';
 import GhostButton from './ui/GhostButton';
+import { useNavigate } from 'react-router-dom';
 
 const TrackingSection = () => {
+  const navigate = useNavigate();
+
+  const handleTrackDelivery = () => {
+    navigate('/track');
+  };
+
   return (
     <section className="section-container">
       <h2 className="text-4xl font-bold mb-8">Real-Time Tracking</h2>
@@ -24,7 +31,7 @@ const TrackingSection = () => {
         </div>
       </div>
       <div className="mt-8">
-        <GhostButton>Track Your Delivery</GhostButton>
+        <GhostButton onClick={handleTrackDelivery}>Track Your Delivery</GhostButton>
       </div>
     </section>
   );
