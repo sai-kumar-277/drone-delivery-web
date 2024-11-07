@@ -8,21 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from './ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from './ui/alert-dialog';
+import { LocationConfirmDialog } from './LocationConfirmDialog';
 import { useGoogleMapsApi } from '../hooks/useGoogleMapsApi';
 import { useToast } from './ui/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 interface LocationMapDialogProps {
   title: string;
@@ -45,7 +34,6 @@ const LocationMapDialog = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const isGoogleMapsLoaded = useGoogleMapsApi();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,21 +78,11 @@ const LocationMapDialog = ({
     setShowConfirmDialog(true);
   };
 
-  const handleConfirm = () => {
-    onSelectLocation();
-    setShowConfirmDialog(false);
-    onOpenChange(false);
-    toast({
-      title: "Success",
-      description: "Location confirmed successfully",
-    });
-  };
-
   return (
     <>
       <Dialog onOpenChange={onOpenChange}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="h-10 w-10">
             <MapPin className="h-4 w-4" />
           </Button>
         </DialogTrigger>
@@ -122,17 +100,17 @@ const LocationMapDialog = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1"
               />
-              <Button type="submit" variant="secondary">
+              <Button type="submit" variant="secondary" size="icon" className="h-10 w-10">
                 <Search className="h-4 w-4" />
               </Button>
             </form>
 
-            <div className="flex gap-2">
-              <Button onClick={onSelectLocation} variant="secondary" className="flex-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <Button onClick={onSelectLocation} variant="secondary" className="w-full">
                 <MapPin className="h-4 w-4 mr-2" />
                 Select Pin Location
               </Button>
-              <Button onClick={onCurrentLocation} variant="outline" className="flex-1">
+              <Button onClick={onCurrentLocation} variant="outline" className="w-full">
                 <Crosshair className="h-4 w-4 mr-2" />
                 Use Current Location
               </Button>
@@ -165,23 +143,16 @@ const LocationMapDialog = ({
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Location</AlertDialogTitle>
-            <AlertDialogDescription>
-              Is this your selected address?
-              <div className="mt-2 p-4 bg-secondary/50 rounded-lg">
-                {selectedAddress}
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirm}>Confirm</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <LocationConfirmDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        selectedAddress={selectedAddress}
+        onConfirm={() => {
+          onSelectLocation();
+          setShowConfirmDialog(false);
+          onOpenChange(false);
+        }}
+      />
     </>
   );
 };

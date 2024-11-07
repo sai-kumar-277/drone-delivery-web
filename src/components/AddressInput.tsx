@@ -24,9 +24,9 @@ const AddressInput = ({
   dialogTitle,
 }: AddressInputProps) => {
   return (
-    <div>
-      <label className="block text-sm font-medium mb-2">{label}</label>
-      <div className="flex gap-2">
+    <div className="space-y-2">
+      <label className="block text-sm font-medium">{label}</label>
+      <div className="flex gap-2 items-start">
         <Input 
           value={value}
           onChange={(e) => onChange(e.target.value)}
