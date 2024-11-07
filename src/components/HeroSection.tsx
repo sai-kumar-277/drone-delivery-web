@@ -2,9 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import GhostButton from './ui/GhostButton';
 import { Package } from 'lucide-react';
 import Header from './Header';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
   const droneRef = useRef<SVGSVGElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,11 +72,11 @@ const HeroSection = () => {
             Experience lightning-fast autonomous drone deliveries with real-time tracking and unprecedented convenience.
           </p>
           <div className="flex gap-4 justify-center">
-            <GhostButton onClick={() => console.log("Track")}>
+            <GhostButton onClick={() => navigate('/track')}>
               <Package className="mr-2 h-4 w-4" />
               Track Package
             </GhostButton>
-            <GhostButton onClick={() => console.log("Ship")}>
+            <GhostButton onClick={() => navigate('/ship')}>
               Ship Now
             </GhostButton>
           </div>

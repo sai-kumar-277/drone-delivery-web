@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import GhostButton from './ui/GhostButton';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { MapPin } from 'lucide-react';
+import { MapPin, Crosshair } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from './ui/use-toast';
 import {
@@ -28,34 +28,94 @@ const ShippingForm = () => {
   const [pickup, setPickup] = useState<Location>({ address: '', coordinates: null });
   const [delivery, setDelivery] = useState<Location>({ address: '', coordinates: null });
   const [mapType, setMapType] = useState<'pickup' | 'delivery' | null>(null);
+  const [tempCoordinates, setTempCoordinates] = useState<Coordinates | null>(null);
 
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
     if (!e.latLng) return;
     
-    const geocoder = new google.maps.Geocoder();
     const coordinates = {
       lat: e.latLng.lat(),
       lng: e.latLng.lng()
     };
+    setTempCoordinates(coordinates);
+  };
 
-    geocoder.geocode({ location: e.latLng }, (results, status) => {
+  const handleSelectLocation = () => {
+    if (!tempCoordinates) {
+      toast({
+        title: "Error",
+        description: "Please drop a pin on the map first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ location: tempCoordinates }, (results, status) => {
       if (status === 'OK' && results?.[0]) {
         const address = results[0].formatted_address;
         if (mapType === 'pickup') {
-          setPickup({ address, coordinates });
+          setPickup({ address, coordinates: tempCoordinates });
           toast({
             title: "Pickup location set",
-            description: `Coordinates: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`,
+            description: `Coordinates: ${tempCoordinates.lat.toFixed(6)}, ${tempCoordinates.lng.toFixed(6)}`,
           });
         } else if (mapType === 'delivery') {
-          setDelivery({ address, coordinates });
+          setDelivery({ address, coordinates: tempCoordinates });
           toast({
             title: "Delivery location set",
-            description: `Coordinates: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`,
+            description: `Coordinates: ${tempCoordinates.lat.toFixed(6)}, ${tempCoordinates.lng.toFixed(6)}`,
           });
         }
       }
     });
+  };
+
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coordinates = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setTempCoordinates(coordinates);
+          
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode({ location: coordinates }, (results, status) => {
+            if (status === 'OK' && results?.[0]) {
+              const address = results[0].formatted_address;
+              if (mapType === 'pickup') {
+                setPickup({ address, coordinates });
+                toast({
+                  title: "Current location set as pickup",
+                  description: `Coordinates: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`,
+                });
+              } else if (mapType === 'delivery') {
+                setDelivery({ address, coordinates });
+                toast({
+                  title: "Current location set as delivery",
+                  description: `Coordinates: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`,
+                });
+              }
+            }
+          });
+        },
+        (error) => {
+          toast({
+            title: "Error",
+            description: "Unable to get current location: " + error.message,
+            variant: "destructive"
+          });
+        }
+      );
+    } else {
+      toast({
+        title: "Error",
+        description: "Geolocation is not supported by your browser",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -68,7 +128,6 @@ const ShippingForm = () => {
       });
       return;
     }
-    // Here you would typically submit the form data including coordinates
     toast({
       title: "Success",
       description: "Shipping request submitted successfully",
@@ -88,7 +147,10 @@ const ShippingForm = () => {
               className="bg-background flex-1" 
             />
             <Dialog onOpenChange={(open) => {
-              if (open) setMapType('pickup');
+              if (open) {
+                setMapType('pickup');
+                setTempCoordinates(null);
+              }
             }}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -99,7 +161,16 @@ const ShippingForm = () => {
                 <DialogHeader>
                   <DialogTitle>Select Pickup Location</DialogTitle>
                 </DialogHeader>
-                <div className="aspect-video mt-4">
+                <div className="flex gap-2 mb-4">
+                  <Button onClick={handleSelectLocation} variant="secondary">
+                    Select Pin Location
+                  </Button>
+                  <Button onClick={getCurrentLocation} variant="outline">
+                    <Crosshair className="h-4 w-4 mr-2" />
+                    Use Current Location
+                  </Button>
+                </div>
+                <div className="aspect-video">
                   <iframe
                     src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d387193.30596073366!2d-74.25986548248784!3d40.69714941932609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1709655733346!5m2!1sen!2sus"
                     width="100%"
@@ -110,9 +181,9 @@ const ShippingForm = () => {
                     referrerPolicy="no-referrer-when-downgrade"
                   />
                 </div>
-                {pickup.coordinates && (
+                {tempCoordinates && (
                   <p className="text-sm text-muted-foreground mt-2">
-                    Selected coordinates: {pickup.coordinates.lat.toFixed(6)}, {pickup.coordinates.lng.toFixed(6)}
+                    Selected coordinates: {tempCoordinates.lat.toFixed(6)}, {tempCoordinates.lng.toFixed(6)}
                   </p>
                 )}
               </DialogContent>
@@ -129,7 +200,10 @@ const ShippingForm = () => {
               className="bg-background flex-1" 
             />
             <Dialog onOpenChange={(open) => {
-              if (open) setMapType('delivery');
+              if (open) {
+                setMapType('delivery');
+                setTempCoordinates(null);
+              }
             }}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -140,7 +214,16 @@ const ShippingForm = () => {
                 <DialogHeader>
                   <DialogTitle>Select Delivery Location</DialogTitle>
                 </DialogHeader>
-                <div className="aspect-video mt-4">
+                <div className="flex gap-2 mb-4">
+                  <Button onClick={handleSelectLocation} variant="secondary">
+                    Select Pin Location
+                  </Button>
+                  <Button onClick={getCurrentLocation} variant="outline">
+                    <Crosshair className="h-4 w-4 mr-2" />
+                    Use Current Location
+                  </Button>
+                </div>
+                <div className="aspect-video">
                   <iframe
                     src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d387193.30596073366!2d-74.25986548248784!3d40.69714941932609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1709655733346!5m2!1sen!2sus"
                     width="100%"
@@ -151,9 +234,9 @@ const ShippingForm = () => {
                     referrerPolicy="no-referrer-when-downgrade"
                   />
                 </div>
-                {delivery.coordinates && (
+                {tempCoordinates && (
                   <p className="text-sm text-muted-foreground mt-2">
-                    Selected coordinates: {delivery.coordinates.lat.toFixed(6)}, {delivery.coordinates.lng.toFixed(6)}
+                    Selected coordinates: {tempCoordinates.lat.toFixed(6)}, {tempCoordinates.lng.toFixed(6)}
                   </p>
                 )}
               </DialogContent>
