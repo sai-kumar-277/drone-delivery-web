@@ -29,6 +29,44 @@ const ShippingForm = () => {
   const [weight, setWeight] = useState('');
   const [date, setDate] = useState('');
 
+  const handleSelectLocation = () => {
+    if (!tempCoordinates) return;
+
+    if (mapType === 'pickup') {
+      setPickup(prev => ({ ...prev, coordinates: tempCoordinates }));
+    } else if (mapType === 'delivery') {
+      setDelivery(prev => ({ ...prev, coordinates: tempCoordinates }));
+    }
+  };
+
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Error",
+        description: "Geolocation is not supported by your browser",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        setTempCoordinates(coords);
+      },
+      (error) => {
+        toast({
+          title: "Error",
+          description: "Unable to retrieve your location",
+          variant: "destructive"
+        });
+      }
+    );
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!pickup.coordinates || !delivery.coordinates) {
