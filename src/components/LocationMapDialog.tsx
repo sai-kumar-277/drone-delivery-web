@@ -9,6 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
+import { useGoogleMapsApi } from '../hooks/useGoogleMapsApi';
+import { useToast } from './ui/use-toast';
 
 interface LocationMapDialogProps {
   title: string;
@@ -26,10 +28,21 @@ const LocationMapDialog = ({
   tempCoordinates,
 }: LocationMapDialogProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const isGoogleMapsLoaded = useGoogleMapsApi();
+  const { toast } = useToast();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery) return;
+
+    if (!isGoogleMapsLoaded) {
+      toast({
+        title: "Error",
+        description: "Google Maps is still loading. Please try again in a moment.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ address: searchQuery }, (results, status) => {
@@ -37,8 +50,14 @@ const LocationMapDialog = ({
         const location = results[0].geometry.location;
         const mapIframe = document.getElementById('location-map') as HTMLIFrameElement;
         if (mapIframe) {
-          mapIframe.src = `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${location.lat()},${location.lng()}&zoom=15`;
+          mapIframe.src = `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_MAPS_API_KEY}&q=${location.lat()},${location.lng()}&zoom=15`;
         }
+      } else {
+        toast({
+          title: "Error",
+          description: "Location not found. Please try a different search.",
+          variant: "destructive"
+        });
       }
     });
   };
@@ -70,7 +89,7 @@ const LocationMapDialog = ({
             </Button>
           </form>
 
-          {/* Action Buttons - Now positioned above the map */}
+          {/* Action Buttons */}
           <div className="flex gap-2">
             <Button onClick={onSelectLocation} variant="secondary" className="flex-1">
               <MapPin className="h-4 w-4 mr-2" />
@@ -86,7 +105,7 @@ const LocationMapDialog = ({
           <div className="aspect-video rounded-lg overflow-hidden border">
             <iframe
               id="location-map"
-              src="https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY&center=20.5937,78.9629&zoom=5"
+              src={`https://www.google.com/maps/embed/v1/view?key=${GOOGLE_MAPS_API_KEY}&center=20.5937,78.9629&zoom=5`}
               width="100%"
               height="100%"
               style={{ border: 0 }}
