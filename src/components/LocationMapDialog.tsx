@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
-import { useGoogleMapsApi } from '../hooks/useGoogleMapsApi';
+import { useGoogleMapsApi, GOOGLE_MAPS_API_KEY } from '../hooks/useGoogleMapsApi';
 import { useToast } from './ui/use-toast';
 
 interface LocationMapDialogProps {
