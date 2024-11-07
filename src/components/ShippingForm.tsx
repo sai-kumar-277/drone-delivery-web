@@ -4,6 +4,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { MapPin } from 'lucide-react';
 import { Button } from './ui/button';
+import { useToast } from './ui/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -12,130 +13,172 @@ import {
   DialogTrigger,
 } from './ui/dialog';
 
-interface MapClickEvent {
-  latLng?: google.maps.LatLng;
+interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+interface Location {
+  address: string;
+  coordinates: Coordinates | null;
 }
 
 const ShippingForm = () => {
-  const [pickupAddress, setPickupAddress] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const { toast } = useToast();
+  const [pickup, setPickup] = useState<Location>({ address: '', coordinates: null });
+  const [delivery, setDelivery] = useState<Location>({ address: '', coordinates: null });
   const [mapType, setMapType] = useState<'pickup' | 'delivery' | null>(null);
 
-  const handleMapClick = (e: MapClickEvent) => {
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
     if (!e.latLng) return;
     
     const geocoder = new google.maps.Geocoder();
+    const coordinates = {
+      lat: e.latLng.lat(),
+      lng: e.latLng.lng()
+    };
+
     geocoder.geocode({ location: e.latLng }, (results, status) => {
       if (status === 'OK' && results?.[0]) {
         const address = results[0].formatted_address;
         if (mapType === 'pickup') {
-          setPickupAddress(address);
+          setPickup({ address, coordinates });
+          toast({
+            title: "Pickup location set",
+            description: `Coordinates: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`,
+          });
         } else if (mapType === 'delivery') {
-          setDeliveryAddress(address);
+          setDelivery({ address, coordinates });
+          toast({
+            title: "Delivery location set",
+            description: `Coordinates: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`,
+          });
         }
       }
     });
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pickup.coordinates || !delivery.coordinates) {
+      toast({
+        title: "Error",
+        description: "Please select both pickup and delivery locations on the map",
+        variant: "destructive"
+      });
+      return;
+    }
+    // Here you would typically submit the form data including coordinates
+    toast({
+      title: "Success",
+      description: "Shipping request submitted successfully",
+    });
+  };
+
   return (
-    <section className="section-container">
-      <h2 className="text-4xl font-bold mb-8">Schedule a Pickup</h2>
-      <div className="max-w-2xl mx-auto">
-        <form className="space-y-6 bg-secondary/50 p-8 rounded-lg backdrop-blur-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Pickup Address</label>
-              <div className="flex gap-2">
-                <Input 
-                  value={pickupAddress}
-                  onChange={(e) => setPickupAddress(e.target.value)}
-                  placeholder="Enter pickup address" 
-                  className="bg-background flex-1" 
-                />
-                <Dialog onOpenChange={(open) => {
-                  if (open) setMapType('pickup');
-                }}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <MapPin className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl">
-                    <DialogHeader>
-                      <DialogTitle>Select Pickup Location</DialogTitle>
-                    </DialogHeader>
-                    <div className="aspect-video mt-4">
-                      <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d387193.30596073366!2d-74.25986548248784!3d40.69714941932609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1709655733346!5m2!1sen!2sus"
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Delivery Address</label>
-              <div className="flex gap-2">
-                <Input 
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  placeholder="Enter delivery address" 
-                  className="bg-background flex-1" 
-                />
-                <Dialog onOpenChange={(open) => {
-                  if (open) setMapType('delivery');
-                }}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <MapPin className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl">
-                    <DialogHeader>
-                      <DialogTitle>Select Delivery Location</DialogTitle>
-                    </DialogHeader>
-                    <div className="aspect-video mt-4">
-                      <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d387193.30596073366!2d-74.25986548248784!3d40.69714941932609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1709655733346!5m2!1sen!2sus"
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
+    <form onSubmit={handleSubmit} className="space-y-6 bg-secondary/50 p-8 rounded-lg backdrop-blur-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium mb-2">Pickup Address</label>
+          <div className="flex gap-2">
+            <Input 
+              value={pickup.address}
+              onChange={(e) => setPickup({ ...pickup, address: e.target.value })}
+              placeholder="Enter pickup address" 
+              className="bg-background flex-1" 
+            />
+            <Dialog onOpenChange={(open) => {
+              if (open) setMapType('pickup');
+            }}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MapPin className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Select Pickup Location</DialogTitle>
+                </DialogHeader>
+                <div className="aspect-video mt-4">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d387193.30596073366!2d-74.25986548248784!3d40.69714941932609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1709655733346!5m2!1sen!2sus"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+                {pickup.coordinates && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Selected coordinates: {pickup.coordinates.lat.toFixed(6)}, {pickup.coordinates.lng.toFixed(6)}
+                  </p>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Package Description</label>
-            <Textarea placeholder="Describe your package" className="bg-background" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Delivery Address</label>
+          <div className="flex gap-2">
+            <Input 
+              value={delivery.address}
+              onChange={(e) => setDelivery({ ...delivery, address: e.target.value })}
+              placeholder="Enter delivery address" 
+              className="bg-background flex-1" 
+            />
+            <Dialog onOpenChange={(open) => {
+              if (open) setMapType('delivery');
+            }}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MapPin className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Select Delivery Location</DialogTitle>
+                </DialogHeader>
+                <div className="aspect-video mt-4">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d387193.30596073366!2d-74.25986548248784!3d40.69714941932609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1709655733346!5m2!1sen!2sus"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+                {delivery.coordinates && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Selected coordinates: {delivery.coordinates.lat.toFixed(6)}, {delivery.coordinates.lng.toFixed(6)}
+                  </p>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Weight (kg)</label>
-              <Input type="number" placeholder="Package weight" className="bg-background" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Preferred Date</label>
-              <Input type="date" className="bg-background" />
-            </div>
-          </div>
-          <GhostButton type="submit" className="w-full">
-            Schedule Pickup
-          </GhostButton>
-        </form>
+        </div>
       </div>
-    </section>
+      <div>
+        <label className="block text-sm font-medium mb-2">Package Description</label>
+        <Textarea placeholder="Describe your package" className="bg-background" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium mb-2">Weight (kg)</label>
+          <Input type="number" placeholder="Package weight" className="bg-background" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Preferred Date</label>
+          <Input type="date" className="bg-background" />
+        </div>
+      </div>
+      <GhostButton type="submit" className="w-full">
+        Schedule Pickup
+      </GhostButton>
+    </form>
   );
 };
 
