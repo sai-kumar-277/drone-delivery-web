@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
 import GhostButton from './ui/GhostButton';
-import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { MapPin, Crosshair } from 'lucide-react';
-import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { useToast } from './ui/use-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog';
+import AddressInput from './AddressInput';
 
 interface Coordinates {
   lat: number;
@@ -137,112 +129,36 @@ const ShippingForm = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-secondary/50 p-8 rounded-lg backdrop-blur-sm">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium mb-2">Pickup Address</label>
-          <div className="flex gap-2">
-            <Input 
-              value={pickup.address}
-              onChange={(e) => setPickup({ ...pickup, address: e.target.value })}
-              placeholder="Enter pickup address" 
-              className="bg-background flex-1" 
-            />
-            <Dialog onOpenChange={(open) => {
-              if (open) {
-                setMapType('pickup');
-                setTempCoordinates(null);
-              }
-            }}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <MapPin className="h-4 w-4" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-3xl">
-                <DialogHeader>
-                  <DialogTitle>Select Pickup Location</DialogTitle>
-                </DialogHeader>
-                <div className="flex gap-2 mb-4">
-                  <Button onClick={handleSelectLocation} variant="secondary">
-                    Select Pin Location
-                  </Button>
-                  <Button onClick={getCurrentLocation} variant="outline">
-                    <Crosshair className="h-4 w-4 mr-2" />
-                    Use Current Location
-                  </Button>
-                </div>
-                <div className="aspect-video">
-                  <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d387193.30596073366!2d-74.25986548248784!3d40.69714941932609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1709655733346!5m2!1sen!2sus"
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-                {tempCoordinates && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Selected coordinates: {tempCoordinates.lat.toFixed(6)}, {tempCoordinates.lng.toFixed(6)}
-                  </p>
-                )}
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Delivery Address</label>
-          <div className="flex gap-2">
-            <Input 
-              value={delivery.address}
-              onChange={(e) => setDelivery({ ...delivery, address: e.target.value })}
-              placeholder="Enter delivery address" 
-              className="bg-background flex-1" 
-            />
-            <Dialog onOpenChange={(open) => {
-              if (open) {
-                setMapType('delivery');
-                setTempCoordinates(null);
-              }
-            }}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <MapPin className="h-4 w-4" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-3xl">
-                <DialogHeader>
-                  <DialogTitle>Select Delivery Location</DialogTitle>
-                </DialogHeader>
-                <div className="flex gap-2 mb-4">
-                  <Button onClick={handleSelectLocation} variant="secondary">
-                    Select Pin Location
-                  </Button>
-                  <Button onClick={getCurrentLocation} variant="outline">
-                    <Crosshair className="h-4 w-4 mr-2" />
-                    Use Current Location
-                  </Button>
-                </div>
-                <div className="aspect-video">
-                  <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d387193.30596073366!2d-74.25986548248784!3d40.69714941932609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1709655733346!5m2!1sen!2sus"
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-                {tempCoordinates && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Selected coordinates: {tempCoordinates.lat.toFixed(6)}, {tempCoordinates.lng.toFixed(6)}
-                  </p>
-                )}
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
+        <AddressInput
+          label="Pickup Address"
+          value={pickup.address}
+          onChange={(value) => setPickup({ ...pickup, address: value })}
+          onOpenMapChange={(open) => {
+            if (open) {
+              setMapType('pickup');
+              setTempCoordinates(null);
+            }
+          }}
+          onSelectLocation={handleSelectLocation}
+          onCurrentLocation={getCurrentLocation}
+          tempCoordinates={tempCoordinates}
+          dialogTitle="Select Pickup Location"
+        />
+        <AddressInput
+          label="Delivery Address"
+          value={delivery.address}
+          onChange={(value) => setDelivery({ ...delivery, address: value })}
+          onOpenMapChange={(open) => {
+            if (open) {
+              setMapType('delivery');
+              setTempCoordinates(null);
+            }
+          }}
+          onSelectLocation={handleSelectLocation}
+          onCurrentLocation={getCurrentLocation}
+          tempCoordinates={tempCoordinates}
+          dialogTitle="Select Delivery Location"
+        />
       </div>
       <div>
         <label className="block text-sm font-medium mb-2">Package Description</label>
