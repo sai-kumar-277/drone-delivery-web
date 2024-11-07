@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { MapPin } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -27,14 +27,14 @@ const ServiceAreas = () => {
     <section className="section-container">
       <h2 className="text-4xl font-bold mb-8">Coverage Areas</h2>
       <div className="bg-secondary/50 p-8 rounded-lg backdrop-blur-sm">
-        <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <MapPin className="text-neon-blue h-6 w-6" />
             <span className="text-xl">Currently serving major metropolitan areas</span>
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className="border-neon-blue text-neon-blue hover:bg-neon-blue/10">
+              <Button variant="outline" className="border-neon-blue text-neon-blue hover:bg-neon-blue/10 w-full md:w-auto">
                 View Covered Cities
               </Button>
             </SheetTrigger>
