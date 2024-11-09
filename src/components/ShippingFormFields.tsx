@@ -1,6 +1,9 @@
 import React from 'react';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
+import { Calendar } from './ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { format } from 'date-fns';
 import AddressInput from './AddressInput';
 
 interface ShippingFormFieldsProps {
@@ -83,12 +86,24 @@ const ShippingFormFields: React.FC<ShippingFormFieldsProps> = ({
         </div>
         <div className="space-y-2">
           <label className="block text-sm font-medium">Preferred Date</label>
-          <Input 
-            type="date" 
-            className="bg-background"
-            value={date}
-            onChange={(e) => onDateChange(e.target.value)}
-          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Input 
+                type="date" 
+                className="bg-background"
+                value={date}
+                onChange={(e) => onDateChange(e.target.value)}
+              />
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={calendarDate}
+                onSelect={onDateSelect}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </>
