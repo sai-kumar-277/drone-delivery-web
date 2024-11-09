@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Crosshair, MapPin, Search } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,13 +12,13 @@ import { LocationConfirmDialog } from './LocationConfirmDialog';
 import { useGoogleMapsApi } from '../hooks/useGoogleMapsApi';
 import { useToast } from './ui/use-toast';
 import LocationMap from './LocationMap';
+import LocationControls from './LocationControls';
 import { reverseGeocode, updateMapIframe, type Coordinates } from '@/utils/mapUtils';
 
 interface LocationMapDialogProps {
   title: string;
   onOpenChange: (open: boolean) => void;
   onSelectLocation: (address: string, coordinates: Coordinates) => void;
-  onCurrentLocation: () => void;
   tempCoordinates: Coordinates | null;
   selectedAddress: string;
 }
@@ -43,15 +42,23 @@ const LocationMapDialog = ({
       if (tempCoordinates) {
         setLocalCoordinates(tempCoordinates);
         updateMapIframe(tempCoordinates);
-        const address = await reverseGeocode(tempCoordinates);
-        if (address) {
-          setCurrentAddress(address);
+        try {
+          const address = await reverseGeocode(tempCoordinates);
+          if (address) {
+            setCurrentAddress(address);
+          }
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to get address for selected location",
+            variant: "destructive"
+          });
         }
       }
     };
 
     handleCoordinatesUpdate();
-  }, [tempCoordinates]);
+  }, [tempCoordinates, toast]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,77 +117,28 @@ const LocationMapDialog = ({
             <DialogTitle>{title}</DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
-            <form onSubmit={handleSearch} className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Search location..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1"
-              />
-              <Button type="submit" variant="secondary" size="icon" className="h-10 w-10">
-                <Search className="h-4 w-4" />
-              </Button>
-            </form>
+          <LocationControls
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            onSearch={handleSearch}
+            setCurrentAddress={setCurrentAddress}
+            setLocalCoordinates={setLocalCoordinates}
+            localCoordinates={localCoordinates}
+            handleDone={handleDone}
+          />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <Button 
-                onClick={handleDone}
-                variant="secondary" 
-                className="w-full"
-                disabled={!localCoordinates}
-              >
-                <MapPin className="h-4 w-4 mr-2" />
-                Select Pin Location
-              </Button>
-              <Button 
-                onClick={() => {
-                  if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                      async (position) => {
-                        const coords = {
-                          lat: position.coords.latitude,
-                          lng: position.coords.longitude
-                        };
-                        setLocalCoordinates(coords);
-                        updateMapIframe(coords);
-                        const address = await reverseGeocode(coords);
-                        if (address) {
-                          setCurrentAddress(address);
-                        }
-                      },
-                      (error) => {
-                        toast({
-                          title: "Error",
-                          description: "Unable to retrieve your location",
-                          variant: "destructive"
-                        });
-                      }
-                    );
-                  }
-                }} 
-                variant="outline" 
-                className="w-full"
-              >
-                <Crosshair className="h-4 w-4 mr-2" />
-                Use Current Location
+          <LocationMap coordinates={localCoordinates} />
+
+          {localCoordinates && currentAddress && (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Selected address: {currentAddress}
+              </p>
+              <Button onClick={handleDone} className="w-full">
+                Done
               </Button>
             </div>
-
-            <LocationMap coordinates={localCoordinates} />
-
-            {localCoordinates && currentAddress && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Selected address: {currentAddress}
-                </p>
-                <Button onClick={handleDone} className="w-full">
-                  Done
-                </Button>
-              </div>
-            )}
-          </div>
+          )}
         </DialogContent>
       </Dialog>
 

@@ -8,20 +8,22 @@ export interface Coordinates {
 export const reverseGeocode = async (coords: Coordinates): Promise<string | null> => {
   const geocoder = new google.maps.Geocoder();
   try {
-    const result = await geocoder.geocode({
-      location: { lat: coords.lat, lng: coords.lng }
+    const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+      geocoder.geocode({ location: { lat: coords.lat, lng: coords.lng } }, (results, status) => {
+        if (status === 'OK' && results && results.length > 0) {
+          resolve(results);
+        } else {
+          reject(new Error('Geocoding failed'));
+        }
+      });
     });
     
-    if (result.results[0]) {
-      return result.results[0].formatted_address;
+    if (result[0]) {
+      return result[0].formatted_address;
     }
-    return null;
+    throw new Error('No address found');
   } catch (error) {
-    toast({
-      title: "Error",
-      description: "Failed to get address for selected location",
-      variant: "destructive"
-    });
+    console.error('Reverse geocoding error:', error);
     return null;
   }
 };
