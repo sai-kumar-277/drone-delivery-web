@@ -1,28 +1,26 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Track from "./pages/Track";
-import Ship from "./pages/Ship";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Index from './pages/Index';
+import Ship from './pages/Ship';
+import Track from './pages/Track';
+import PackageDetails from './pages/PackageDetails';
+import LiveStatus from './pages/LiveStatus';
+import DeliveryLocation from './pages/DeliveryLocation';
+import { Toaster } from './components/ui/toaster';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/ship" element={<Ship />} />
+        <Route path="/track" element={<Track />} />
+        <Route path="/package-details" element={<PackageDetails />} />
+        <Route path="/live-status" element={<LiveStatus />} />
+        <Route path="/delivery-location" element={<DeliveryLocation />} />
+      </Routes>
       <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/track" element={<Track />} />
-          <Route path="/ship" element={<Ship />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </Router>
+  );
+}
 
 export default App;

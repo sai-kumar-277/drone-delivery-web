@@ -3,10 +3,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Package, Plane, MapPin } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Track = () => {
   const [trackingId, setTrackingId] = useState('');
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleTracking = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +20,6 @@ const Track = () => {
       });
       return;
     }
-    // Here you would typically make an API call to fetch tracking data
     toast({
       title: "Package Status",
       description: "Your package is currently in transit",
@@ -43,21 +44,35 @@ const Track = () => {
         </form>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <div className="bg-secondary/50 p-6 rounded-lg backdrop-blur-sm">
-            <Package className="text-primary h-12 w-12 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-center">Package Details</h3>
-            <p className="text-gray-400 text-center mt-2">View package information</p>
-          </div>
-          <div className="bg-secondary/50 p-6 rounded-lg backdrop-blur-sm">
-            <Plane className="text-primary h-12 w-12 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-center">Live Status</h3>
-            <p className="text-gray-400 text-center mt-2">Real-time tracking updates</p>
-          </div>
-          <div className="bg-secondary/50 p-6 rounded-lg backdrop-blur-sm">
-            <MapPin className="text-primary h-12 w-12 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-center">Delivery Location</h3>
-            <p className="text-gray-400 text-center mt-2">View delivery address</p>
-          </div>
+          <Button
+            variant="secondary"
+            className="bg-secondary/50 p-6 h-auto flex flex-col items-center gap-4 hover:bg-secondary/60"
+            onClick={() => navigate('/package-details')}
+          >
+            <Package className="text-primary h-12 w-12" />
+            <h3 className="text-xl font-bold">Package Details</h3>
+            <p className="text-gray-400 text-center">View package information</p>
+          </Button>
+
+          <Button
+            variant="secondary"
+            className="bg-secondary/50 p-6 h-auto flex flex-col items-center gap-4 hover:bg-secondary/60"
+            onClick={() => navigate('/live-status')}
+          >
+            <Plane className="text-primary h-12 w-12" />
+            <h3 className="text-xl font-bold">Live Status</h3>
+            <p className="text-gray-400 text-center">Real-time tracking updates</p>
+          </Button>
+
+          <Button
+            variant="secondary"
+            className="bg-secondary/50 p-6 h-auto flex flex-col items-center gap-4 hover:bg-secondary/60"
+            onClick={() => navigate('/delivery-location')}
+          >
+            <MapPin className="text-primary h-12 w-12" />
+            <h3 className="text-xl font-bold">Delivery Location</h3>
+            <p className="text-gray-400 text-center">View delivery address</p>
+          </Button>
         </div>
       </div>
     </div>
