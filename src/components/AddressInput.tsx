@@ -8,7 +8,6 @@ interface AddressInputProps {
   onChange: (value: string) => void;
   onOpenMapChange: (open: boolean) => void;
   onSelectLocation: (address: string, coordinates: { lat: number; lng: number }) => void;
-  onCurrentLocation: () => void;
   tempCoordinates: { lat: number; lng: number } | null;
   dialogTitle: string;
 }
@@ -19,7 +18,6 @@ const AddressInput = ({
   onChange,
   onOpenMapChange,
   onSelectLocation,
-  onCurrentLocation,
   tempCoordinates,
   dialogTitle,
 }: AddressInputProps) => {
@@ -37,7 +35,6 @@ const AddressInput = ({
           title={dialogTitle}
           onOpenChange={onOpenMapChange}
           onSelectLocation={onSelectLocation}
-          onCurrentLocation={onCurrentLocation}
           tempCoordinates={tempCoordinates}
           selectedAddress={value}
         />
