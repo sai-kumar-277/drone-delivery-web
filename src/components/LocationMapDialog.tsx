@@ -33,11 +33,13 @@ const LocationMapDialog = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [currentAddress, setCurrentAddress] = useState('');
+  const [localCoordinates, setLocalCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const isGoogleMapsLoaded = useGoogleMapsApi();
   const { toast } = useToast();
 
   useEffect(() => {
     if (tempCoordinates) {
+      setLocalCoordinates(tempCoordinates);
       reverseGeocode(tempCoordinates);
     }
   }, [tempCoordinates]);
@@ -80,12 +82,16 @@ const LocationMapDialog = ({
     geocoder.geocode({ address: searchQuery }, (results, status) => {
       if (status === 'OK' && results && results[0]) {
         const location = results[0].geometry.location;
+        const coords = {
+          lat: location.lat(),
+          lng: location.lng()
+        };
         const mapIframe = document.getElementById('location-map') as HTMLIFrameElement;
         if (mapIframe) {
-          mapIframe.src = `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${location.lat()},${location.lng()}&zoom=15`;
+          mapIframe.src = `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${coords.lat},${coords.lng}&zoom=15`;
         }
         setCurrentAddress(results[0].formatted_address);
-        setTempCoordinates({ lat: location.lat(), lng: location.lng() });
+        setLocalCoordinates(coords);
       } else {
         toast({
           title: "Error",
@@ -97,7 +103,7 @@ const LocationMapDialog = ({
   };
 
   const handleDone = () => {
-    if (!tempCoordinates || !currentAddress) {
+    if (!localCoordinates || !currentAddress) {
       toast({
         title: "Error",
         description: "Please select a location first",
@@ -138,7 +144,7 @@ const LocationMapDialog = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <Button 
                 onClick={() => {
-                  if (tempCoordinates) {
+                  if (localCoordinates) {
                     handleDone();
                   }
                 }} 
@@ -167,7 +173,7 @@ const LocationMapDialog = ({
               />
             </div>
 
-            {tempCoordinates && currentAddress && (
+            {localCoordinates && currentAddress && (
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">
                   Selected address: {currentAddress}
@@ -186,7 +192,7 @@ const LocationMapDialog = ({
         onOpenChange={setShowConfirmDialog}
         selectedAddress={currentAddress}
         onConfirm={() => {
-          onSelectLocation(currentAddress, tempCoordinates!);
+          onSelectLocation(currentAddress, localCoordinates!);
           setShowConfirmDialog(false);
           onOpenChange(false);
         }}
