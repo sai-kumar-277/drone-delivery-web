@@ -44,6 +44,14 @@ const ShippingFormFields: React.FC<ShippingFormFieldsProps> = ({
   onLocationSelect,
   tempCoordinates,
 }) => {
+  const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numValue = parseFloat(value);
+    if (value === '' || (numValue >= 0 && numValue <= 10)) {
+      onWeightChange(value);
+    }
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -81,11 +89,15 @@ const ShippingFormFields: React.FC<ShippingFormFieldsProps> = ({
           <label className="block text-sm font-medium">Weight (kg)</label>
           <Input 
             type="number" 
+            step="0.1"
+            min="0"
+            max="10"
             placeholder="Package weight" 
             className="bg-background"
             value={weight}
-            onChange={(e) => onWeightChange(e.target.value)}
+            onChange={handleWeightChange}
           />
+          <p className="text-xs text-muted-foreground">Weight must be between 0 and 10 kg</p>
         </div>
         <div className="space-y-2">
           <label className="block text-sm font-medium">Preferred Date</label>
