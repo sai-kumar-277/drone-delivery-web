@@ -11,6 +11,7 @@ import { Calendar } from './ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { format } from 'date-fns';
 import { Button } from './ui/button';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Coordinates {
   lat: number;
@@ -44,7 +45,7 @@ const ShippingForm = () => {
     setTempCoordinates(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pickup.coordinates || !delivery.coordinates) {
       toast({
@@ -65,13 +66,34 @@ const ShippingForm = () => {
     setShowConfirmDialog(true);
   };
 
-  const handleConfirmShipment = () => {
-    setShowConfirmDialog(false);
-    toast({
-      title: "Success",
-      description: "Shipping request submitted successfully",
-    });
-    navigate('/track');
+  const handleConfirmShipment = async () => {
+    try {
+      const trackingId = Math.random().toString(36).substring(2, 15).toUpperCase();
+      const { error } = await supabase
+        .from('packages')
+        .insert({
+          tracking_id: trackingId,
+          status: 'processing',
+          estimated_delivery: new Date(date),
+          current_location: pickup.address,
+          destination: delivery.address,
+        });
+
+      if (error) throw error;
+
+      setShowConfirmDialog(false);
+      toast({
+        title: "Success",
+        description: "Shipping request submitted successfully",
+      });
+      navigate('/track');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit shipping request",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
