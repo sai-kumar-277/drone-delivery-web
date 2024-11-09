@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Calendar } from 'lucide-react';
 import GhostButton from './ui/GhostButton';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
@@ -125,12 +126,18 @@ const ShippingForm = () => {
           </div>
           <div className="space-y-2">
             <label className="block text-sm font-medium">Preferred Date</label>
-            <Input 
-              type="date" 
-              className="bg-background"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            <div className="relative">
+              <Input 
+                type="date" 
+                className="bg-background pr-10"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+              <Calendar 
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" 
+                size={20} 
+              />
+            </div>
           </div>
         </div>
 
