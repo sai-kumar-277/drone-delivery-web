@@ -19,11 +19,10 @@ const Track = () => {
       const { data, error } = await supabase
         .from('packages')
         .select('*')
-        .eq('tracking_id', trackingId)
-        .single();
+        .eq('tracking_id', trackingId);
 
       if (error) throw error;
-      return data;
+      return data?.[0] || null;
     },
     enabled: false
   });
@@ -49,7 +48,7 @@ const Track = () => {
       } else {
         toast({
           title: "Error",
-          description: "Package not found",
+          description: "Package not found. Please check your tracking ID.",
           variant: "destructive"
         });
       }
