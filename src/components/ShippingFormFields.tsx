@@ -4,10 +4,10 @@ import { Input } from './ui/input';
 import { Calendar } from './ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { format } from 'date-fns';
-import AddressInput from './AddressInput';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import LocationMapDialog from './LocationMapDialog';
 
 interface ShippingFormFieldsProps {
   pickup: { address: string; coordinates: { lat: number; lng: number } | null };
@@ -55,24 +55,37 @@ const ShippingFormFields: React.FC<ShippingFormFieldsProps> = ({
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AddressInput
-          label="Pickup Address"
-          value={pickup.address}
-          onChange={(value) => onPickupChange({ ...pickup, address: value })}
-          onOpenMapChange={(open) => onMapTypeChange(open, 'pickup')}
-          onSelectLocation={onLocationSelect}
-          tempCoordinates={tempCoordinates}
-          dialogTitle="Select Pickup Location"
-        />
-        <AddressInput
-          label="Delivery Address"
-          value={delivery.address}
-          onChange={(value) => onDeliveryChange({ ...delivery, address: value })}
-          onOpenMapChange={(open) => onMapTypeChange(open, 'delivery')}
-          onSelectLocation={onLocationSelect}
-          tempCoordinates={tempCoordinates}
-          dialogTitle="Select Delivery Location"
-        />
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Pickup Location</label>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 p-3 bg-secondary/50 rounded-lg text-sm">
+              {pickup.address || 'No location selected'}
+            </div>
+            <LocationMapDialog
+              title="Select Pickup Location"
+              onOpenChange={(open) => onMapTypeChange(open, 'pickup')}
+              onSelectLocation={onLocationSelect}
+              tempCoordinates={tempCoordinates}
+              selectedAddress={pickup.address}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Delivery Location</label>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 p-3 bg-secondary/50 rounded-lg text-sm">
+              {delivery.address || 'No location selected'}
+            </div>
+            <LocationMapDialog
+              title="Select Delivery Location"
+              onOpenChange={(open) => onMapTypeChange(open, 'delivery')}
+              onSelectLocation={onLocationSelect}
+              tempCoordinates={tempCoordinates}
+              selectedAddress={delivery.address}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="space-y-2">
