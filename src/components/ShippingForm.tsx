@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon } from 'lucide-react';
-import GhostButton from './ui/GhostButton';
-import { Textarea } from './ui/textarea';
-import { Input } from './ui/input';
 import { useToast } from './ui/use-toast';
-import AddressInput from './AddressInput';
-import { ShipmentConfirmDialog } from './ShipmentConfirmDialog';
 import { useNavigate } from 'react-router-dom';
-import { Calendar } from './ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { format } from 'date-fns';
-import { Button } from './ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import GhostButton from './ui/GhostButton';
+import { ShipmentConfirmDialog } from './ShipmentConfirmDialog';
+import ShippingFormFields from './ShippingFormFields';
+import { generateTrackingId, submitShipmentToSupabase } from '@/utils/shippingUtils';
 
 interface Coordinates {
   lat: number;
@@ -68,18 +62,13 @@ const ShippingForm = () => {
 
   const handleConfirmShipment = async () => {
     try {
-      const trackingId = Math.random().toString(36).substring(2, 15).toUpperCase();
-      const { error } = await supabase
-        .from('packages')
-        .insert({
-          tracking_id: trackingId,
-          status: 'processing',
-          estimated_delivery: new Date(date),
-          current_location: pickup.address,
-          destination: delivery.address,
-        });
-
-      if (error) throw error;
+      const trackingId = generateTrackingId();
+      await submitShipmentToSupabase(
+        trackingId,
+        pickup.address,
+        delivery.address,
+        date
+      );
 
       setShowConfirmDialog(false);
       toast({
@@ -106,88 +95,28 @@ const ShippingForm = () => {
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-6 bg-secondary/50 p-4 sm:p-8 rounded-lg backdrop-blur-sm">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AddressInput
-            label="Pickup Address"
-            value={pickup.address}
-            onChange={(value) => setPickup({ ...pickup, address: value })}
-            onOpenMapChange={(open) => {
-              if (open) {
-                setMapType('pickup');
-                setTempCoordinates(null);
-              }
-            }}
-            onSelectLocation={handleSelectLocation}
-            tempCoordinates={tempCoordinates}
-            dialogTitle="Select Pickup Location"
-          />
-          <AddressInput
-            label="Delivery Address"
-            value={delivery.address}
-            onChange={(value) => setDelivery({ ...delivery, address: value })}
-            onOpenMapChange={(open) => {
-              if (open) {
-                setMapType('delivery');
-                setTempCoordinates(null);
-              }
-            }}
-            onSelectLocation={handleSelectLocation}
-            tempCoordinates={tempCoordinates}
-            dialogTitle="Select Delivery Location"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">Package Description</label>
-          <Textarea 
-            placeholder="Describe your package" 
-            className="bg-background resize-none"
-            value={packageDescription}
-            onChange={(e) => setPackageDescription(e.target.value)}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Weight (kg)</label>
-            <Input 
-              type="number" 
-              placeholder="Package weight" 
-              className="bg-background"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Preferred Date</label>
-            <div className="relative">
-              <Input 
-                type="date" 
-                className="bg-background pr-10"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-              />
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  >
-                    <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    mode="single"
-                    selected={calendarDate}
-                    onSelect={handleDateSelect}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-        </div>
+        <ShippingFormFields
+          pickup={pickup}
+          delivery={delivery}
+          packageDescription={packageDescription}
+          weight={weight}
+          date={date}
+          calendarDate={calendarDate}
+          onPickupChange={setPickup}
+          onDeliveryChange={setDelivery}
+          onDescriptionChange={setPackageDescription}
+          onWeightChange={setWeight}
+          onDateSelect={handleDateSelect}
+          onDateChange={setDate}
+          onMapTypeChange={(open, type) => {
+            if (open) {
+              setMapType(type);
+              setTempCoordinates(null);
+            }
+          }}
+          onLocationSelect={handleSelectLocation}
+          tempCoordinates={tempCoordinates}
+        />
 
         <GhostButton type="submit" className="w-full">
           Schedule Pickup
