@@ -29,14 +29,13 @@ const ShippingForm = () => {
   const [weight, setWeight] = useState('');
   const [date, setDate] = useState('');
 
-  const handleSelectLocation = () => {
-    if (!tempCoordinates) return;
-
+  const handleSelectLocation = (address: string, coordinates: Coordinates) => {
     if (mapType === 'pickup') {
-      setPickup(prev => ({ ...prev, coordinates: tempCoordinates }));
+      setPickup({ address, coordinates });
     } else if (mapType === 'delivery') {
-      setDelivery(prev => ({ ...prev, coordinates: tempCoordinates }));
+      setDelivery({ address, coordinates });
     }
+    setTempCoordinates(null);
   };
 
   const getCurrentLocation = () => {
@@ -73,6 +72,14 @@ const ShippingForm = () => {
       toast({
         title: "Error",
         description: "Please select both pickup and delivery locations on the map",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (!packageDescription || !weight || !date) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
         variant: "destructive"
       });
       return;

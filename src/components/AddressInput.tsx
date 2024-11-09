@@ -7,7 +7,7 @@ interface AddressInputProps {
   value: string;
   onChange: (value: string) => void;
   onOpenMapChange: (open: boolean) => void;
-  onSelectLocation: () => void;
+  onSelectLocation: (address: string, coordinates: { lat: number; lng: number }) => void;
   onCurrentLocation: () => void;
   tempCoordinates: { lat: number; lng: number } | null;
   dialogTitle: string;

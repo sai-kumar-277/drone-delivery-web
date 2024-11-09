@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Crosshair, MapPin, Search } from 'lucide-react';
@@ -16,7 +16,7 @@ import { useToast } from './ui/use-toast';
 interface LocationMapDialogProps {
   title: string;
   onOpenChange: (open: boolean) => void;
-  onSelectLocation: () => void;
+  onSelectLocation: (address: string, coordinates: { lat: number; lng: number }) => void;
   onCurrentLocation: () => void;
   tempCoordinates: { lat: number; lng: number } | null;
   selectedAddress: string;
@@ -32,8 +32,36 @@ const LocationMapDialog = ({
 }: LocationMapDialogProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [currentAddress, setCurrentAddress] = useState('');
   const isGoogleMapsLoaded = useGoogleMapsApi();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (tempCoordinates) {
+      reverseGeocode(tempCoordinates);
+    }
+  }, [tempCoordinates]);
+
+  const reverseGeocode = async (coords: { lat: number; lng: number }) => {
+    if (!isGoogleMapsLoaded) return;
+
+    const geocoder = new google.maps.Geocoder();
+    try {
+      const result = await geocoder.geocode({
+        location: { lat: coords.lat, lng: coords.lng }
+      });
+      
+      if (result.results[0]) {
+        setCurrentAddress(result.results[0].formatted_address);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to get address for selected location",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +84,8 @@ const LocationMapDialog = ({
         if (mapIframe) {
           mapIframe.src = `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${location.lat()},${location.lng()}&zoom=15`;
         }
+        setCurrentAddress(results[0].formatted_address);
+        setTempCoordinates({ lat: location.lat(), lng: location.lng() });
       } else {
         toast({
           title: "Error",
@@ -67,7 +97,7 @@ const LocationMapDialog = ({
   };
 
   const handleDone = () => {
-    if (!tempCoordinates || !selectedAddress) {
+    if (!tempCoordinates || !currentAddress) {
       toast({
         title: "Error",
         description: "Please select a location first",
@@ -106,7 +136,15 @@ const LocationMapDialog = ({
             </form>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <Button onClick={onSelectLocation} variant="secondary" className="w-full">
+              <Button 
+                onClick={() => {
+                  if (tempCoordinates) {
+                    handleDone();
+                  }
+                }} 
+                variant="secondary" 
+                className="w-full"
+              >
                 <MapPin className="h-4 w-4 mr-2" />
                 Select Pin Location
               </Button>
@@ -129,10 +167,10 @@ const LocationMapDialog = ({
               />
             </div>
 
-            {tempCoordinates && (
+            {tempCoordinates && currentAddress && (
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  Selected coordinates: {tempCoordinates.lat.toFixed(6)}, {tempCoordinates.lng.toFixed(6)}
+                  Selected address: {currentAddress}
                 </p>
                 <Button onClick={handleDone} className="w-full">
                   Done
@@ -146,9 +184,9 @@ const LocationMapDialog = ({
       <LocationConfirmDialog
         open={showConfirmDialog}
         onOpenChange={setShowConfirmDialog}
-        selectedAddress={selectedAddress}
+        selectedAddress={currentAddress}
         onConfirm={() => {
-          onSelectLocation();
+          onSelectLocation(currentAddress, tempCoordinates!);
           setShowConfirmDialog(false);
           onOpenChange(false);
         }}
