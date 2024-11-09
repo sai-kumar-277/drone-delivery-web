@@ -5,7 +5,7 @@ import { Package, Plane, MapPin } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 
 const Track = () => {
   const [trackingId, setTrackingId] = useState('');
