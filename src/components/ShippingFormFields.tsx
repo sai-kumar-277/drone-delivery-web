@@ -5,6 +5,9 @@ import { Calendar } from './ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { format } from 'date-fns';
 import AddressInput from './AddressInput';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { Button } from './ui/button';
+import { cn } from '@/lib/utils';
 
 interface ShippingFormFieldsProps {
   pickup: { address: string; coordinates: { lat: number; lng: number } | null };
@@ -88,12 +91,16 @@ const ShippingFormFields: React.FC<ShippingFormFieldsProps> = ({
           <label className="block text-sm font-medium">Preferred Date</label>
           <Popover>
             <PopoverTrigger asChild>
-              <Input 
-                type="date" 
-                className="bg-background"
-                value={date}
-                onChange={(e) => onDateChange(e.target.value)}
-              />
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(new Date(date), "PPP") : <span>Pick a date</span>}
+              </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
