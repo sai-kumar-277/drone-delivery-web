@@ -17,9 +17,14 @@ const PackageDetails = () => {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-3xl mx-auto space-y-8">
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" onClick={() => navigate('/track')} className="p-2">
-            <ArrowLeft className="h-6 w-6" />
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/')} 
+            className="p-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
           </Button>
           <h1 className="text-4xl font-bold">Package Details</h1>
         </div>

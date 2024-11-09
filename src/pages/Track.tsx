@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Package, Plane, MapPin } from 'lucide-react';
+import { Package, Plane, MapPin, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -76,6 +76,14 @@ const Track = () => {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-3xl mx-auto space-y-8">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/')} 
+          className="mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Home
+        </Button>
         <h1 className="text-4xl font-bold text-center mb-8">Track Your Package</h1>
         
         <form onSubmit={handleTracking} className="space-y-4">
