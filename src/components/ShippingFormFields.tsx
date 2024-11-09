@@ -4,7 +4,6 @@ import { Input } from './ui/input';
 import { Calendar } from './ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Button } from './ui/button';
-import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import AddressInput from './AddressInput';
 
@@ -75,7 +74,6 @@ const ShippingFormFields: React.FC<ShippingFormFieldsProps> = ({
           onChange={(e) => onDescriptionChange(e.target.value)}
         />
       </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="block text-sm font-medium">Weight (kg)</label>
@@ -89,32 +87,12 @@ const ShippingFormFields: React.FC<ShippingFormFieldsProps> = ({
         </div>
         <div className="space-y-2">
           <label className="block text-sm font-medium">Preferred Date</label>
-          <div className="relative">
-            <Input 
-              type="date" 
-              className="bg-background pr-10"
-              value={date}
-              onChange={(e) => onDateChange(e.target.value)}
-            />
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                >
-                  <CalendarIcon className="h-5 w-5 text-foreground" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={calendarDate}
-                  onSelect={onDateSelect}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+          <Input 
+            type="date" 
+            className="bg-background"
+            value={date}
+            onChange={(e) => onDateChange(e.target.value)}
+          />
         </div>
       </div>
     </>
