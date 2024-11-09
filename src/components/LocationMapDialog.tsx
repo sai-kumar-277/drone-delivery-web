@@ -12,13 +12,15 @@ import {
 import { LocationConfirmDialog } from './LocationConfirmDialog';
 import { useGoogleMapsApi } from '../hooks/useGoogleMapsApi';
 import { useToast } from './ui/use-toast';
+import LocationMap from './LocationMap';
+import { reverseGeocode, updateMapIframe, type Coordinates } from '@/utils/mapUtils';
 
 interface LocationMapDialogProps {
   title: string;
   onOpenChange: (open: boolean) => void;
-  onSelectLocation: (address: string, coordinates: { lat: number; lng: number }) => void;
+  onSelectLocation: (address: string, coordinates: Coordinates) => void;
   onCurrentLocation: () => void;
-  tempCoordinates: { lat: number; lng: number } | null;
+  tempCoordinates: Coordinates | null;
   selectedAddress: string;
 }
 
@@ -26,53 +28,37 @@ const LocationMapDialog = ({
   title,
   onOpenChange,
   onSelectLocation,
-  onCurrentLocation,
   tempCoordinates,
   selectedAddress,
 }: LocationMapDialogProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [currentAddress, setCurrentAddress] = useState('');
-  const [localCoordinates, setLocalCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [localCoordinates, setLocalCoordinates] = useState<Coordinates | null>(null);
   const isGoogleMapsLoaded = useGoogleMapsApi();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (tempCoordinates) {
-      setLocalCoordinates(tempCoordinates);
-      reverseGeocode(tempCoordinates);
-    }
-  }, [tempCoordinates]);
-
-  const reverseGeocode = async (coords: { lat: number; lng: number }) => {
-    if (!isGoogleMapsLoaded) return;
-
-    const geocoder = new google.maps.Geocoder();
-    try {
-      const result = await geocoder.geocode({
-        location: { lat: coords.lat, lng: coords.lng }
-      });
-      
-      if (result.results[0]) {
-        setCurrentAddress(result.results[0].formatted_address);
+    const handleCoordinatesUpdate = async () => {
+      if (tempCoordinates) {
+        setLocalCoordinates(tempCoordinates);
+        updateMapIframe(tempCoordinates);
+        const address = await reverseGeocode(tempCoordinates);
+        if (address) {
+          setCurrentAddress(address);
+        }
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to get address for selected location",
-        variant: "destructive"
-      });
-    }
-  };
+    };
+
+    handleCoordinatesUpdate();
+  }, [tempCoordinates]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery) return;
-
-    if (!isGoogleMapsLoaded) {
+    if (!searchQuery || !isGoogleMapsLoaded) {
       toast({
         title: "Error",
-        description: "Google Maps is still loading. Please try again in a moment.",
+        description: isGoogleMapsLoaded ? "Please enter a search query" : "Google Maps is still loading",
         variant: "destructive"
       });
       return;
@@ -86,10 +72,7 @@ const LocationMapDialog = ({
           lat: location.lat(),
           lng: location.lng()
         };
-        const mapIframe = document.getElementById('location-map') as HTMLIFrameElement;
-        if (mapIframe) {
-          mapIframe.src = `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${coords.lat},${coords.lng}&zoom=15`;
-        }
+        updateMapIframe(coords);
         setCurrentAddress(results[0].formatted_address);
         setLocalCoordinates(coords);
       } else {
@@ -143,35 +126,49 @@ const LocationMapDialog = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <Button 
-                onClick={() => {
-                  if (localCoordinates) {
-                    handleDone();
-                  }
-                }} 
+                onClick={handleDone}
                 variant="secondary" 
                 className="w-full"
+                disabled={!localCoordinates}
               >
                 <MapPin className="h-4 w-4 mr-2" />
                 Select Pin Location
               </Button>
-              <Button onClick={onCurrentLocation} variant="outline" className="w-full">
+              <Button 
+                onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      async (position) => {
+                        const coords = {
+                          lat: position.coords.latitude,
+                          lng: position.coords.longitude
+                        };
+                        setLocalCoordinates(coords);
+                        updateMapIframe(coords);
+                        const address = await reverseGeocode(coords);
+                        if (address) {
+                          setCurrentAddress(address);
+                        }
+                      },
+                      (error) => {
+                        toast({
+                          title: "Error",
+                          description: "Unable to retrieve your location",
+                          variant: "destructive"
+                        });
+                      }
+                    );
+                  }
+                }} 
+                variant="outline" 
+                className="w-full"
+              >
                 <Crosshair className="h-4 w-4 mr-2" />
                 Use Current Location
               </Button>
             </div>
 
-            <div className="aspect-video rounded-lg overflow-hidden border">
-              <iframe
-                id="location-map"
-                src={`https://www.google.com/maps/embed/v1/view?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&center=20.5937,78.9629&zoom=5`}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
+            <LocationMap coordinates={localCoordinates} />
 
             {localCoordinates && currentAddress && (
               <div className="space-y-2">
@@ -192,9 +189,11 @@ const LocationMapDialog = ({
         onOpenChange={setShowConfirmDialog}
         selectedAddress={currentAddress}
         onConfirm={() => {
-          onSelectLocation(currentAddress, localCoordinates!);
-          setShowConfirmDialog(false);
-          onOpenChange(false);
+          if (localCoordinates) {
+            onSelectLocation(currentAddress, localCoordinates);
+            setShowConfirmDialog(false);
+            onOpenChange(false);
+          }
         }}
       />
     </>
