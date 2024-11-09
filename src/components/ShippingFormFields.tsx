@@ -1,10 +1,6 @@
 import React from 'react';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
-import { Calendar } from './ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Button } from './ui/button';
-import { format } from 'date-fns';
 import AddressInput from './AddressInput';
 
 interface ShippingFormFieldsProps {
