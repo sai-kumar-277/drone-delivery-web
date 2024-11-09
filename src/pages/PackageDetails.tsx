@@ -2,10 +2,17 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const PackageDetails = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const packageData = location.state?.packageData;
+
+  if (!packageData) {
+    navigate('/track');
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -28,19 +35,19 @@ const PackageDetails = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Tracking Number</p>
-                <p className="font-medium">DRN-123456789</p>
+                <p className="font-medium">{packageData.tracking_id}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Package Weight</p>
-                <p className="font-medium">2.5 kg</p>
+                <p className="font-medium">{packageData.weight} kg</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Package Dimensions</p>
-                <p className="font-medium">30cm x 20cm x 15cm</p>
+                <p className="text-sm text-muted-foreground">Package Description</p>
+                <p className="font-medium">{packageData.description}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Package Type</p>
-                <p className="font-medium">Standard Delivery</p>
+                <p className="font-medium">{packageData.type || 'Standard Delivery'}</p>
               </div>
             </div>
           </CardContent>

@@ -2,10 +2,17 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const DeliveryLocation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const packageData = location.state?.packageData;
+
+  if (!packageData) {
+    navigate('/track');
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -28,19 +35,19 @@ const DeliveryLocation = () => {
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Street Address</p>
-                <p className="font-medium">123 Drone Delivery Street</p>
+                <p className="font-medium">{packageData.delivery_address}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">City</p>
-                <p className="font-medium">San Francisco</p>
+                <p className="font-medium">{packageData.delivery_city}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">State</p>
-                <p className="font-medium">California</p>
+                <p className="font-medium">{packageData.delivery_state}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">ZIP Code</p>
-                <p className="font-medium">94105</p>
+                <p className="font-medium">{packageData.delivery_zip}</p>
               </div>
             </div>
           </CardContent>

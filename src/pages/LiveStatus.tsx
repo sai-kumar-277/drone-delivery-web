@@ -2,10 +2,17 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plane, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const LiveStatus = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const packageData = location.state?.packageData;
+
+  if (!packageData) {
+    navigate('/track');
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -28,19 +35,19 @@ const LiveStatus = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Current Status</p>
-                <p className="font-medium">In Transit</p>
+                <p className="font-medium">{packageData.status}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Estimated Time</p>
-                <p className="font-medium">15 minutes</p>
+                <p className="font-medium">{packageData.estimated_time} minutes</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Current Speed</p>
-                <p className="font-medium">35 km/h</p>
+                <p className="font-medium">{packageData.current_speed || '35'} km/h</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Distance Remaining</p>
-                <p className="font-medium">8.5 km</p>
+                <p className="font-medium">{packageData.distance_remaining || '8.5'} km</p>
               </div>
             </div>
           </CardContent>

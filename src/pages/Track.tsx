@@ -4,13 +4,31 @@ import { Button } from '@/components/ui/button';
 import { Package, Plane, MapPin } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
 
 const Track = () => {
   const [trackingId, setTrackingId] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleTracking = (e: React.FormEvent) => {
+  const { data: packageData, refetch } = useQuery({
+    queryKey: ['package', trackingId],
+    queryFn: async () => {
+      if (!trackingId) return null;
+      const { data, error } = await supabase
+        .from('packages')
+        .select('*')
+        .eq('tracking_id', trackingId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: false
+  });
+
+  const handleTracking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!trackingId) {
       toast({
@@ -20,10 +38,40 @@ const Track = () => {
       });
       return;
     }
-    toast({
-      title: "Package Status",
-      description: "Your package is currently in transit",
-    });
+
+    try {
+      await refetch();
+      if (packageData) {
+        toast({
+          title: "Package Found",
+          description: "Tracking information retrieved successfully",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Package not found",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to retrieve package information",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleNavigate = (path: string) => {
+    if (!packageData) {
+      toast({
+        title: "Error",
+        description: "Please track a package first",
+        variant: "destructive"
+      });
+      return;
+    }
+    navigate(path, { state: { packageData } });
   };
 
   return (
@@ -47,7 +95,7 @@ const Track = () => {
           <Button
             variant="secondary"
             className="bg-secondary/50 p-6 h-auto flex flex-col items-center gap-4 hover:bg-secondary/60"
-            onClick={() => navigate('/package-details')}
+            onClick={() => handleNavigate('/package-details')}
           >
             <Package className="text-primary h-12 w-12" />
             <h3 className="text-xl font-bold">Package Details</h3>
@@ -57,7 +105,7 @@ const Track = () => {
           <Button
             variant="secondary"
             className="bg-secondary/50 p-6 h-auto flex flex-col items-center gap-4 hover:bg-secondary/60"
-            onClick={() => navigate('/live-status')}
+            onClick={() => handleNavigate('/live-status')}
           >
             <Plane className="text-primary h-12 w-12" />
             <h3 className="text-xl font-bold">Live Status</h3>
@@ -67,7 +115,7 @@ const Track = () => {
           <Button
             variant="secondary"
             className="bg-secondary/50 p-6 h-auto flex flex-col items-center gap-4 hover:bg-secondary/60"
-            onClick={() => navigate('/delivery-location')}
+            onClick={() => handleNavigate('/delivery-location')}
           >
             <MapPin className="text-primary h-12 w-12" />
             <h3 className="text-xl font-bold">Delivery Location</h3>
