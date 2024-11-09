@@ -38,34 +38,6 @@ const ShippingForm = () => {
     setTempCoordinates(null);
   };
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      toast({
-        title: "Error",
-        description: "Geolocation is not supported by your browser",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const coords = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-        setTempCoordinates(coords);
-      },
-      (error) => {
-        toast({
-          title: "Error",
-          description: "Unable to retrieve your location",
-          variant: "destructive"
-        });
-      }
-    );
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!pickup.coordinates || !delivery.coordinates) {
@@ -111,7 +83,6 @@ const ShippingForm = () => {
               }
             }}
             onSelectLocation={handleSelectLocation}
-            onCurrentLocation={getCurrentLocation}
             tempCoordinates={tempCoordinates}
             dialogTitle="Select Pickup Location"
           />
@@ -126,7 +97,6 @@ const ShippingForm = () => {
               }
             }}
             onSelectLocation={handleSelectLocation}
-            onCurrentLocation={getCurrentLocation}
             tempCoordinates={tempCoordinates}
             dialogTitle="Select Delivery Location"
           />
