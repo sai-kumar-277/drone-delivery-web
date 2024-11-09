@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import GhostButton from './ui/GhostButton';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
@@ -7,6 +7,10 @@ import { useToast } from './ui/use-toast';
 import AddressInput from './AddressInput';
 import { ShipmentConfirmDialog } from './ShipmentConfirmDialog';
 import { useNavigate } from 'react-router-dom';
+import { Calendar } from './ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { format } from 'date-fns';
+import { Button } from './ui/button';
 
 interface Coordinates {
   lat: number;
@@ -29,6 +33,7 @@ const ShippingForm = () => {
   const [packageDescription, setPackageDescription] = useState('');
   const [weight, setWeight] = useState('');
   const [date, setDate] = useState('');
+  const [calendarDate, setCalendarDate] = useState<Date>();
 
   const handleSelectLocation = (address: string, coordinates: Coordinates) => {
     if (mapType === 'pickup') {
@@ -67,6 +72,13 @@ const ShippingForm = () => {
       description: "Shipping request submitted successfully",
     });
     navigate('/track');
+  };
+
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    setCalendarDate(selectedDate);
+    if (selectedDate) {
+      setDate(format(selectedDate, 'yyyy-MM-dd'));
+    }
   };
 
   return (
@@ -133,10 +145,24 @@ const ShippingForm = () => {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
               />
-              <Calendar 
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" 
-                size={20} 
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  >
+                    <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={calendarDate}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </div>
